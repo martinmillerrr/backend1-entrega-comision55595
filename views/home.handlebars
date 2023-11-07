@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Productos de Limpieza</title>
+</head>
+
+<body>
+    <h1>Productos de Limpieza</h1>
+    <ul>
+        {{#each products}}
+        <li>
+            {{this.name}}
+            <button class="add-to-cart" data-id="{{this.id}}">Agregar al Carrito</button>
+        </li>
+        {{/each}}
+    </ul>
+
+    <h2>Carrito de Compras</h2>
+    <ul class="cart">
+        <!-- El contenido del carrito se actualizará dinámicamente a través de JavaScript -->
+    </ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/public/cliente.js"></script>
+</body>
+
+</html>

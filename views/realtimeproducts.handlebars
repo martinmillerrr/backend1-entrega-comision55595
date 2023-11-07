@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Productos de Limpieza en Tiempo Real</title>
+</head>
+
+<body>
+    <h1>Productos de Limpieza en Tiempo Real</h1>
+    <ul>
+        {{#each products}}
+        <li>
+            {{this.name}}
+            <button class="add-to-cart" data-id="{{this.id}}">Agregar al Carrito</button>
+        </li>
+        {{/each}}
+    </ul>
+
+    <h2>Carrito de Compras</h2>
+    <ul class="cart">
+        <!-- El contenido del carrito se actualizará dinámicamente a través de JavaScript -->
+    </ul>
+
+    <form id="productForm">
+        <label for="productName">Nombre del producto:</label>
+        <input type="text" id="productName" name="productName">
+        <button type="submit">Agregar Producto</button>
+    </form>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/public/cliente.js"></script>
+
+</html>

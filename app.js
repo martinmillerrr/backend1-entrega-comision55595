@@ -1,43 +1,54 @@
-// Importa las dependencias
 const express = require('express');
-const ProductManager = require('./productmanager.js');
+const http = require('http');
+const socketIo = require('socket.io');
+const exphbs = require('express-handlebars');
 
-// Crea una instancia de Express
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
-// Middleware para parsear JSON
-app.use(express.json());
+app.engine('handlebars', exphbs({ defaultLayout: 'home' }));
+app.set('view engine', 'handlebars');
 
-// Endpoint para obtener todos los productos
-app.get('/products', (req, res) => {
-    // Lee los productos desde ProductManager
-    const products = ProductManager.getProducts();
+app.use(express.static('public'));
 
-    // Verifica si se proporciona un límite (query param: limit)
-    const limit = req.query.limit;
-    if (limit) {
-        const limitedProducts = products.slice(0, parseInt(limit));
-        return res.json({ products: limitedProducts });
-    }
-
-    // Devuelve todos los productos
-    res.json({ products });
+app.get('/', (req, res) => {
+    res.render('home');
 });
 
-// Endpoint para obtener un producto por ID
-app.get('/products/:pid', (req, res) => {
-    const productId = req.params.pid;
-    const product = ProductManager.getProductById(productId);
-
-    if (product) {
-        res.json({ product });
-    } else {
-        res.status(404).json({ error: 'Producto no encontrado' });
-    }
+app.get('/realtimeproducts', (req, res) => {
+    res.render('realtimeproducts');
 });
 
-// Inicializa el servidor en el puerto 3000
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor Express en funcionamiento en el puerto ${PORT}`);
+// Configura una lista de productos de ejemplo
+const products = [
+    { id: 1, name: 'Producto 1' },
+    { id: 2, name: 'Producto 2' },
+    // Agrega más productos aquí
+];
+
+io.on('connection', (socket) => {
+    // Enviar la lista de productos a la vista en tiempo real
+    socket.emit('updateProducts', products);
+
+    socket.on('addProduct', (product) => {
+        // Agregar un producto a la lista
+        products.push(product);
+        // Emitir una actualización a todos los clientes
+        io.emit('updateProducts', products);
+    });
+
+    socket.on('deleteProduct', (productId) => {
+        // Eliminar un producto de la lista
+        const index = products.findIndex((product) => product.id === productId);
+        if (index !== -1) {
+            products.splice(index, 1);
+            // Emitir una actualización a todos los clientes
+            io.emit('updateProducts', products);
+        }
+    });
+});
+
+server.listen(3010, () => {
+    console.log('Servidor en ejecución en http://localhost:3010');
 });
